@@ -7,7 +7,8 @@
 #include "DoublyLinkedListError.h"
 
 class DoublyLinkedListEmptyError : public DoublyLinkedListError {
-
+ public:
+  const char* what() const noexcept override;
 };
 
 

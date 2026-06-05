@@ -8,10 +8,15 @@
 template<typename T>
 class DoublyLinkedNode {
  public:
-  //your methods
+  T val;
+  DoublyLinkedNode<T>* next;
+  DoublyLinkedNode<T>* prev;
 
- private:
-  //your members
+  explicit DoublyLinkedNode(const T& v){
+    val=v;
+    next=nullptr;
+    prev=nullptr;
+  }
 
 };
 

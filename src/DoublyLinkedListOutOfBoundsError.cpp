@@ -4,4 +4,7 @@
 
 #include "DoublyLinkedListOutOfBoundsError.h"
 
+const char* DoublyLinkedListOutOfBoundsError::what() const noexcept{
+  return "iterator out of bounds";
+}
 

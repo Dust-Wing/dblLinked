@@ -7,7 +7,8 @@
 #include <exception>
 
  class DoublyLinkedListError : public std::exception{
-
+ public:
+  const char* what() const noexcept override;
 };
 
 #endif //TESTDOUBLELINKEDLIST_DOUBLYLINKEDLISTERROR_H

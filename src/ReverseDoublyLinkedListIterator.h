@@ -7,6 +7,7 @@
 
 #include <iterator>
 #include "DoublyLinkedNode.h"
+#include "DoublyLinkedListOutOfBoundsError.h"
 
 template<typename T>
 class ReverseDoublyLinkedListIterator {
@@ -20,35 +21,80 @@ public:
     using const_pointer = const value_type*;
     using difference_type = ptrdiff_t;
 
+    ReverseDoublyLinkedListIterator(){
+        curNode=nullptr;
+    }
+
+    explicit ReverseDoublyLinkedListIterator(DoublyLinkedNode<T>* p){
+        curNode=p;
+    }
 
     //are the two iterators equal?
-    bool operator==(const ReverseDoublyLinkedListIterator<T>& rhs) const;
+    bool operator==(const ReverseDoublyLinkedListIterator<T>& rhs) const{
+        return curNode==rhs.curNode;
+    }
 
     //are the two iterators different?
-    bool operator!=(const ReverseDoublyLinkedListIterator<T>& rhs) const;
+    bool operator!=(const ReverseDoublyLinkedListIterator<T>& rhs) const{
+        return curNode!=rhs.curNode;
+    }
 
     //is the iterator safe to dereference?
-    explicit operator bool() const;
+    explicit operator bool() const{
+        return curNode!=nullptr;
+    }
 
     //go to the next element
-    ReverseDoublyLinkedListIterator<T>& operator++(); //pre
-    const ReverseDoublyLinkedListIterator<T> operator++(int); //post
+    ReverseDoublyLinkedListIterator<T>& operator++(){
+        if(curNode!=nullptr){
+            curNode=curNode->prev;
+        }
+        return *this;
+    }
+    const ReverseDoublyLinkedListIterator<T> operator++(int){
+        ReverseDoublyLinkedListIterator<T> old=*this;
+        ++(*this);
+        return old;
+    }
 
     //go to the previous element
-    ReverseDoublyLinkedListIterator<T>& operator--(); //pre
-    const ReverseDoublyLinkedListIterator<T> operator--(int); //post
+    ReverseDoublyLinkedListIterator<T>& operator--(){
+        if(curNode!=nullptr){
+            curNode=curNode->next;
+        }
+        return *this;
+    }
+    const ReverseDoublyLinkedListIterator<T> operator--(int){
+        ReverseDoublyLinkedListIterator<T> old=*this;
+        --(*this);
+        return old;
+    }
 
     //get a reference to the value
-    [[nodiscard]] const_reference operator*() const;
+    [[nodiscard]] const_reference operator*() const{
+        if(curNode==nullptr){
+            throw DoublyLinkedListOutOfBoundsError();
+        }
+        return curNode->val;
+    }
 
-    [[nodiscard]] reference operator*();
+    [[nodiscard]] reference operator*(){
+        if(curNode==nullptr){
+            throw DoublyLinkedListOutOfBoundsError();
+        }
+        return curNode->val;
+    }
 
-    [[nodiscard]] DoublyLinkedNode<T>*& getCurNode();
+    [[nodiscard]] DoublyLinkedNode<T>*& getCurNode(){
+        return curNode;
+    }
 
-    [[nodiscard]] const DoublyLinkedNode<T>*& getCurNode() const;
+    [[nodiscard]] const DoublyLinkedNode<T>*& getCurNode() const{
+        return reinterpret_cast<const DoublyLinkedNode<T>*&>(curNode);
+    }
 
 private:
-    //your members
+    DoublyLinkedNode<T>* curNode;
 };
 
 

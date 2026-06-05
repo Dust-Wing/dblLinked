@@ -6,7 +6,7 @@
 #define LINKEDLIST_DOUBLYLINKEDLIST_H
 
 #include <vector>
-#include <memory>
+#include <iostream>
 #include "DoublyLinkedNode.h"
 #include "DoublyLinkedListEmptyError.h"
 #include "ConstDoublyLinkedListIterator.h"
@@ -95,7 +95,9 @@ public:
     void erase(iterator& position);
 
 private:
-    // your class members
+    Node_Ptr head;
+    Node_Ptr tail;
+    int ct;
 };
 
 //write to the stream each element in the list in order
@@ -109,4 +111,239 @@ std::ostream& operator<<(std::ostream& out, const DoublyLinkedList<T>& doublyLin
 template<typename T>
 std::istream& operator>>(std::istream& in, DoublyLinkedList<T>& doublyLinkedList);
 
-#endif //LINKEDLIST_DOUBLYLINKEDLIST_H
+template<typename T>
+DoublyLinkedList<T>::DoublyLinkedList(){
+    head=nullptr;
+    tail=nullptr;
+    ct=0;
+}
+
+template<typename T>
+DoublyLinkedList<T>::DoublyLinkedList(const std::vector<T>& values){
+    head=nullptr;
+    tail=nullptr;
+    ct=0;
+    for(const auto& x:values){
+        push_back(x);
+    }
+}
+
+template<typename T>
+DoublyLinkedList<T>::~DoublyLinkedList(){
+    clear();
+}
+
+template<typename T>
+void DoublyLinkedList<T>::clear(){
+    Node_Ptr cur=head;
+    while(cur!=nullptr){
+        Node_Ptr nxt=cur->next;
+        delete cur;
+        cur=nxt;
+    }
+    head=nullptr;
+    tail=nullptr;
+    ct=0;
+}
+
+template<typename T>
+const T& DoublyLinkedList<T>::front() const{
+    if(empty()){
+        throw DoublyLinkedListEmptyError();
+    }
+    return head->val;
+}
+
+template<typename T>
+T& DoublyLinkedList<T>::front(){
+    if(empty()){
+        throw DoublyLinkedListEmptyError();
+    }
+    return head->val;
+}
+
+template<typename T>
+const T& DoublyLinkedList<T>::back() const{
+    if(empty()){
+        throw DoublyLinkedListEmptyError();
+    }
+    return tail->val;
+}
+
+template<typename T>
+T& DoublyLinkedList<T>::back(){
+    if(empty()){
+        throw DoublyLinkedListEmptyError();
+    }
+    return tail->val;
+}
+
+template<typename T>
+void DoublyLinkedList<T>::push_front(const T& value){
+    Node_Ptr n=new DoublyLinkedNode<T>(value);
+    if(empty()){
+        head=n;
+        tail=n;
+    }else{
+        n->next=head;
+        head->prev=n;
+        head=n;
+    }
+    ct++;
+}
+
+template<typename T>
+void DoublyLinkedList<T>::push_back(const T& value){
+    Node_Ptr n=new DoublyLinkedNode<T>(value);
+    if(empty()){
+        head=n;
+        tail=n;
+    }else{
+        n->prev=tail;
+        tail->next=n;
+        tail=n;
+    }
+    ct++;
+}
+
+template<typename T>
+bool DoublyLinkedList<T>::empty() const{
+    return ct==0;
+}
+
+template<typename T>
+int DoublyLinkedList<T>::size() const{
+    return ct;
+}
+
+template<typename T>
+typename DoublyLinkedList<T>::const_iterator DoublyLinkedList<T>::begin() const{
+    return const_iterator(head);
+}
+
+template<typename T>
+typename DoublyLinkedList<T>::const_iterator DoublyLinkedList<T>::end() const{
+    return const_iterator(nullptr);
+}
+
+template<typename T>
+typename DoublyLinkedList<T>::iterator DoublyLinkedList<T>::begin(){
+    return iterator(head);
+}
+
+template<typename T>
+typename DoublyLinkedList<T>::iterator DoublyLinkedList<T>::end(){
+    return iterator(nullptr);
+}
+
+template<typename T>
+typename DoublyLinkedList<T>::const_reverse_iterator DoublyLinkedList<T>::crbegin() const{
+    return const_reverse_iterator(tail);
+}
+
+template<typename T>
+typename DoublyLinkedList<T>::const_reverse_iterator DoublyLinkedList<T>::crend() const{
+    return const_reverse_iterator(nullptr);
+}
+
+template<typename T>
+typename DoublyLinkedList<T>::reverse_iterator DoublyLinkedList<T>::rbegin(){
+    return reverse_iterator(tail);
+}
+
+template<typename T>
+typename DoublyLinkedList<T>::reverse_iterator DoublyLinkedList<T>::rend(){
+    return reverse_iterator(nullptr);
+}
+
+template<typename T>
+void DoublyLinkedList<T>::insert(iterator& position,const T& value){
+    if(empty()){
+        push_back(value);
+        return;
+    }
+    if(!position){
+        push_back(value);
+        return;
+    }
+    Node_Ptr cur=position.getCurNode();
+    if(cur==head){
+        push_front(value);
+        return;
+    }
+    Node_Ptr n=new DoublyLinkedNode<T>(value);
+    n->next=cur;
+    n->prev=cur->prev;
+    cur->prev->next=n;
+    cur->prev=n;
+    ct++;
+}
+
+template<typename T>
+void DoublyLinkedList<T>::erase(iterator& position){
+    if(!position){
+        return;
+    }
+    Node_Ptr cur=position.getCurNode();
+    if(head==tail){
+        delete cur;
+        head=nullptr;
+        tail=nullptr;
+        ct=0;
+        return;
+    }
+    if(cur==head){
+        head=head->next;
+        head->prev=nullptr;
+        delete cur;
+        ct--;
+        return;
+    }
+    if(cur==tail){
+        tail=tail->prev;
+        tail->next=nullptr;
+        delete cur;
+        ct--;
+        return;
+    }
+    cur->prev->next=cur->next;
+    cur->next->prev=cur->prev;
+    delete cur;
+    ct--;
+}
+
+template<typename T>
+std::ostream& operator<<(std::ostream& out,const DoublyLinkedList<T>& doublyLinkedList){
+    auto it=doublyLinkedList.begin();
+    bool first=true;
+    while(it!=doublyLinkedList.end()){
+        if(!first){
+            out<<" ";
+        }
+        out<<*it;
+        first=false;
+        ++it;
+    }
+    return out;
+}
+
+template<typename T>
+std::istream& operator>>(std::istream& in,DoublyLinkedList<T>& doublyLinkedList){
+    doublyLinkedList.clear();
+    T x;
+    while(in>>x){
+        doublyLinkedList.push_back(x);
+        int c=in.peek();
+        while(c==' '||c=='\t'||c=='\r'){
+            in.get();
+            c=in.peek();
+        }
+        if(c=='\n'){
+            in.get();
+            break;
+        }
+    }
+    return in;
+}
+
+#endif
